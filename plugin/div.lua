@@ -1,3 +1,16 @@
+local divwFormatting = "auto"
+
+vim.api.nvim_create_user_command("Divfw", function(data)
+    divwFormatting = data.args
+end, {
+    nargs = 1,
+    bar = true,
+    range = true,
+    complete = function()
+        return { 'auto', 'box', 'tb', 'line' }
+    end
+})
+
 local function centerPad(text, size)
     if vim.fn.strwidth(text) >= size then
         return text
@@ -169,18 +182,36 @@ vim.api.nvim_create_user_command("Boxify", function(args)
     vim.api.nvim_buf_set_text(0, sl, sc, el, ec - 1, newText)
 end, { range = true, nargs = "?" })
 
+---@param data vim.api.keyset.create_user_command.command_args
+local function getStartEndLines(data)
+    local line = vim.fn.line(".")
+    local endLine = vim.fn.line(".")
+    if data.line1 > 0 then
+        line = data.line1
+    end
+    if data.line2 > 0 then
+        endLine = data.line2
+    end
+
+    if line > endLine then
+        local temp = endLine
+        endLine    = line
+        line       = temp
+    end
+
+
+    return line, endLine
+end
+
 vim.api.nvim_create_user_command("Divline", function(cmdData)
     local endCol = getScreenWidth()
 
-    local charCount = endCol - 1
+    local width = endCol
     if #cmdData.fargs == 2 then
-        charCount = tonumber(cmdData.fargs[2]) or endCol - 1
+        width = tonumber(cmdData.fargs[2]) or width
     end
 
-    local line = vim.fn.line(".")
-    if cmdData.line1 > 0 then
-        line = cmdData.line1
-    end
+    local line, endLine = getStartEndLines(cmdData)
 
     local lineText = vim.fn.getline(line)
     if not cmdData.bang and lineText ~= "" then
@@ -193,27 +224,26 @@ vim.api.nvim_create_user_command("Divline", function(cmdData)
         char = cmdData.fargs[1]
     end
 
-    vim.fn.setline(line, string.rep(char, charCount))
+    width = width / vim.fn.strwidth(char)
+
+    for i = line, endLine do
+        vim.fn.setline(i, string.rep(char, width))
+    end
 end, { addr = "lines", bang = true, nargs = "*" })
 
 vim.api.nvim_create_user_command("Divword", function(cmdData)
     local endCol = getScreenWidth()
 
-    local charCount = endCol
+    local width = endCol
     if #cmdData.fargs > 2 then
-        charCount = tonumber(cmdData.fargs[3]) or endCol
+        width = tonumber(cmdData.fargs[3]) or endCol
     end
 
-    charCount = charCount - 1
+    local startLine, endLine = getStartEndLines(cmdData)
 
-    local line = vim.fn.line(".")
-    if cmdData.line1 > 0 then
-        line = cmdData.line1
-    end
-
-    local lineText = vim.fn.getline(line)
+    local lineText = vim.fn.getline(startLine)
     if not cmdData.bang and lineText ~= "" then
-        vim.notify(string.format("line %d is not empty, use ! to replace", line))
+        vim.notify(string.format("line %d is not empty, use ! to replace", startLine))
         return
     end
 
@@ -226,15 +256,12 @@ vim.api.nvim_create_user_command("Divword", function(cmdData)
         char = cmdData.fargs[1]
     end
 
-    local remainingLen = charCount - #lineText
+    local charWidth = vim.fn.strwidth(char)
 
-    local left = remainingLen / 2
+    local remainingLen = width - vim.fn.strlen(lineText)
+
+    local left = math.floor(remainingLen / 2)
     local right = remainingLen - left
-
-    -- if the len of text is even, it's off by one for some reason
-    if #lineText % 2 == 0 then
-        right = right + 1
-    end
 
     local finalText = string.format(
         "%s%s%s",
@@ -243,5 +270,49 @@ vim.api.nvim_create_user_command("Divword", function(cmdData)
         string.rep(char, right)
     )
 
-    vim.fn.setline(line, finalText)
+    local emptyLine = string.format(
+        "%s%s%s",
+        char,
+        string.rep(' ', width - charWidth * 2),
+        char
+    )
+
+    -- one line
+    if divwFormatting == "line" or endLine - startLine == 0 then
+        for i = startLine, endLine do
+            vim.fn.setline(i, finalText)
+        end
+        -- odd lines
+    elseif divwFormatting == "box" or (endLine - startLine + 1) % 2 == 1 and (endLine - startLine) > 0 then
+        local middle = math.floor((endLine + startLine) / 2)
+
+        finalText = string.format(
+            "%s%s%s%s%s",
+            char,
+            string.rep(' ', left - 1),
+            lineText,
+            string.rep(' ', right - 1),
+            char
+        )
+
+        vim.fn.setline(startLine, string.rep(char, width))
+        for i = startLine + 1, middle do
+            vim.fn.setline(i, emptyLine)
+        end
+
+        vim.fn.setline(middle, finalText)
+
+        for i = middle + 1, endLine - 1 do
+            vim.fn.setline(i, emptyLine)
+        end
+
+        vim.fn.setline(endLine, string.rep(char, width))
+        -- even lines
+    elseif divwFormatting == "tb" or (endLine - startLine + 1) % 2 == 0 then
+        vim.fn.setline(startLine, finalText)
+        for i = startLine + 1, endLine - 1 do
+            vim.fn.setline(i, emptyLine)
+        end
+        vim.fn.setline(endLine, finalText)
+    end
 end, { addr = 'lines', bang = true, nargs = "*" })

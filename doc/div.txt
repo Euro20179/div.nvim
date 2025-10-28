@@ -33,10 +33,19 @@ width=[+]{width}
 height=[+]{height}
     similar width=, but works on the height
 
+                                                                      *:Divfw*
+:Divfw {style}
+    Sets the style of |:Divw|.
+
+    {style} can be one of:
+        auto - automatically determined based on |divw-rules|
+        line - act as if one line was given for [range]
+        box  - draw a box
+        tb   - only set top and bottom to contain {text}
 
                                                                      *:Divline*
-:[line]Divl[ine][!] {char} [{width}]
-    Puts a line of {char} on line [line] that is 'textwidth' wide.
+:[range]Divl[ine][!] {char} [{width}]
+    Puts a line of {char} on lines [range] that is 'textwidth' wide.
     Or if 'textwidth' is 0, 80 wide.
     Or if {width} is given, {width} wide.
 
@@ -45,9 +54,17 @@ height=[+]{height}
     The default char is -
 
                                                                      *:Divword*
-:[line]Divw[ord][!] {char} {text} [{width}]
+:[range]Divw[ord][!] {char} {text} [{width}]
     Puts {char} on either side of {text} to fill the entire width.
     See |Divline| for the rules reguarding how long the width is.
+
+                                                                  *divw-rules*
+    If |:Divfw| style is auto:
+    If [range] is more than 1 line, and is an odd number of lines, {text}
+    will only be put in the middle line, only the top and bottom lines will
+    be full with {char}. If there are an even number of lines, {text} will be
+    placed on the first and last lines, and the middle will be hollow.
+    Otherwise use the |:Divfw| style
     
     If ! is given, override the current line
 
