@@ -45,8 +45,7 @@ height=[+]{height}
 
                                                                      *:Divline*
 :[range]Divl[ine][!] {char} [{width}]
-    Puts a line of {char} on lines [range] that is 'textwidth' wide.
-    Or if 'textwidth' is 0, 80 wide.
+    Puts a line of {char} on lines [range] that is |div-textwidth| wide.
     Or if {width} is given, {width} wide.
 
     If ! is given, override the current line
@@ -68,5 +67,26 @@ height=[+]{height}
     
     If ! is given, override the current line
 
+==============================================================================
+2. Configuration
+                                                                   *div-config*
+
+There isn't much configuration here.
+
+------------------------------------------------------------------------------
+2.1 Variables
+                                                               *div-variables*
+
+                                                           *b:mmfml_textwidth*
+b:mmfml_textwidth   the text width to use instead of 'textwidth'.
+                    Falls back to 80.
+
+==============================================================================
+3. Misc
+                                                               *div-textwidth*
+The order for determining text width
+1. use |b:mmfml_textwidth|
+2. fallback 'textwidth'
+3. fallback to 80
 
  vim: ft=help:tw=78:ts=8:norl:

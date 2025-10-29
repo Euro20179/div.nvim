@@ -65,6 +65,8 @@ vim.api.nvim_create_user_command("Boxify", function(args)
 
     local text = vim.api.nvim_buf_get_text(0, sl, sc, el, ec, {})
 
+    local strip = false
+
     local height = #text - 2
     local lineCount = #text
     local width = vim.fn.strwidth(text[1])
@@ -282,7 +284,7 @@ vim.api.nvim_create_user_command("Divword", function(cmdData)
         for i = startLine, endLine do
             vim.fn.setline(i, finalText)
         end
-        -- odd lines
+    -- odd lines
     elseif divwFormatting == "box" or (endLine - startLine + 1) % 2 == 1 and (endLine - startLine) > 0 then
         local middle = math.floor((endLine + startLine) / 2)
 
@@ -307,7 +309,7 @@ vim.api.nvim_create_user_command("Divword", function(cmdData)
         end
 
         vim.fn.setline(endLine, string.rep(char, width))
-        -- even lines
+    -- even lines
     elseif divwFormatting == "tb" or (endLine - startLine + 1) % 2 == 0 then
         vim.fn.setline(startLine, finalText)
         for i = startLine + 1, endLine - 1 do
