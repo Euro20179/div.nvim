@@ -243,7 +243,7 @@ vim.api.nvim_create_user_command("Divword", function(cmdData)
 
     local startLine, endLine = getStartEndLines(cmdData)
 
-    local lineText = vim.fn.getline(startLine)
+    local lineText = vim.fn.trim(vim.fn.getline(startLine))
     if not cmdData.bang and lineText ~= "" then
         vim.notify(string.format("line %d is not empty, use ! to replace", startLine))
         return
@@ -260,7 +260,7 @@ vim.api.nvim_create_user_command("Divword", function(cmdData)
 
     local charWidth = vim.fn.strwidth(char)
 
-    local remainingLen = width - vim.fn.strlen(lineText)
+    local remainingLen = width - vim.fn.strwidth(lineText)
 
     local left = math.floor(remainingLen / 2)
     local right = remainingLen - left
