@@ -64,8 +64,17 @@ height=[+]{height}
     be full with {char}. If there are an even number of lines, {text} will be
     placed on the first and last lines, and the middle will be hollow.
     Otherwise use the |:Divfw| style
-    
+
     If ! is given, override the current line
+
+                                                                     *:Divbox*
+:Divb[ox]
+    Is a macro to:
+        1. Use |:Boxify| on the current line
+        2. Center the box
+        3. Add a line on the middle row of the box using |:Divword|`! ─`
+        4. Replace the middle │ with ┤ and ├ to make the box
+           connect with the line
 
 ==============================================================================
 2. Configuration

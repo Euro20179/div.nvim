@@ -52,7 +52,7 @@ local function getScreenWidth()
     return width
 end
 
-vim.api.nvim_create_user_command("Boxify", function(args)
+local function boxify(args)
     if args.range ~= 2 then
         vim.notify("A visual range must be selected", vim.log.levels.ERROR)
         return
@@ -182,7 +182,9 @@ vim.api.nvim_create_user_command("Boxify", function(args)
     -- }}}
 
     vim.api.nvim_buf_set_text(0, sl, sc, el, ec - 1, newText)
-end, { range = true, nargs = "?" })
+end
+
+vim.api.nvim_create_user_command("Boxify", boxify, { range = true, nargs = "?" })
 
 ---@param data vim.api.keyset.create_user_command.command_args
 local function getStartEndLines(data)
@@ -233,7 +235,7 @@ vim.api.nvim_create_user_command("Divline", function(cmdData)
     end
 end, { addr = "lines", bang = true, nargs = "*" })
 
-vim.api.nvim_create_user_command("Divword", function(cmdData)
+local function divword(cmdData)
     local endCol = getScreenWidth()
 
     local width = endCol
@@ -284,7 +286,7 @@ vim.api.nvim_create_user_command("Divword", function(cmdData)
         for i = startLine, endLine do
             vim.fn.setline(i, finalText)
         end
-    -- odd lines
+        -- odd lines
     elseif divwFormatting == "box" or (endLine - startLine + 1) % 2 == 1 and (endLine - startLine) > 0 then
         local middle = math.floor((endLine + startLine) / 2)
 
@@ -309,7 +311,7 @@ vim.api.nvim_create_user_command("Divword", function(cmdData)
         end
 
         vim.fn.setline(endLine, string.rep(char, width))
-    -- even lines
+        -- even lines
     elseif divwFormatting == "tb" or (endLine - startLine + 1) % 2 == 0 then
         vim.fn.setline(startLine, finalText)
         for i = startLine + 1, endLine - 1 do
@@ -317,4 +319,17 @@ vim.api.nvim_create_user_command("Divword", function(cmdData)
         end
         vim.fn.setline(endLine, finalText)
     end
-end, { addr = 'lines', bang = true, nargs = "*" })
+end
+
+vim.api.nvim_create_user_command("Divword", divword, { addr = 'lines', bang = true, nargs = "*" })
+
+vim.api.nvim_create_user_command("Divbox", function(cmdData)
+    vim.cmd[[
+        exec "norm V:Boxify\<CR>"
+        norm k
+        .,+2cen
+        norm j
+        Divw! ─
+        norm 0f│r┤f│r├
+    ]]
+end, {})
