@@ -1,7 +1,9 @@
 :Boxify	div.txt	/*:Boxify*
+:Divbox	div.txt	/*:Divbox*
 :Divfw	div.txt	/*:Divfw*
 :Divline	div.txt	/*:Divline*
 :Divword	div.txt	/*:Divword*
+:Toc	div.txt	/*:Toc*
 b:mmfml_textwidth	div.txt	/*b:mmfml_textwidth*
 boxify-kwargs	div.txt	/*boxify-kwargs*
 boxify-styles	div.txt	/*boxify-styles*

@@ -141,3 +141,20 @@ vim.api.nvim_create_user_command("Divbox", function()
         -1,+1cen
     ]]
 end, {})
+
+vim.api.nvim_create_user_command("Toc", function(cmdData)
+    local lines = vim.api.nvim_buf_get_lines(0, cmdData.line1 - 1, cmdData.line2, false)
+
+    local kwargs = kwargs2tbl(cmdData.fargs)
+
+    local dotP = getScreenWidth() / 2
+    if kwargs.dotp ~= nil then
+        dotP = tonumber(kwargs.dotp) or dotP
+    end
+
+    local text = div.tableofconents(lines, {
+        dotPadding = dotP
+    })
+
+    vim.api.nvim_buf_set_lines(0, cmdData.line1 - 1, cmdData.line2, false, text)
+end, {range = true, nargs = "*"})

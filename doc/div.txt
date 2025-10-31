@@ -76,6 +76,21 @@ height=[+]{height}
         4. Replace the middle │ with ┤ and ├ to make the box
            connect with the line
 
+                                                                        *:Toc*
+:[range]Toc [{char}] {kwargs}
+    Turns [range] lines into a table-of-contents looking set of lines.
+    uses the first <cWORD> as the section, the rest is the description.
+    puts (|div-textwidth| / 2 + {dotp}) {char} between the section and description
+
+    {char} is "." by default
+    {dotp} is the dotpadding, 4 by default
+
+    {kwargs}:
+        dotp=n
+            use a dotpadding of n
+        char=x
+            use x as the char
+
 ==============================================================================
 2. Configuration
                                                                    *div-config*

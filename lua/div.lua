@@ -239,4 +239,47 @@ function M.divword(height, text, options)
     return M.draw(text, char, width, instructions):sub(0, -2)
 end
 
+---@class div.tableofcontents.Options
+---@field char string? the char to use as the separator
+---@field dotPadding integer?
+
+---@param lines string[]
+---@param options div.tableofcontents.Options
+function M.tableofconents(lines, options)
+
+    local tocLines = {}
+
+    local maxLabelWidth = 0
+    for _, line in pairs(lines) do
+        local firstSpace = line:find("%s")
+        local label = line:sub(0, firstSpace - 1)
+        local rest = line:sub(firstSpace + 1)
+        tocLines[#tocLines+1] = {label, rest:gsub("\\.+ ", "")}
+
+        local w = vim.fn.strwidth(label)
+        if w > maxLabelWidth then
+            maxLabelWidth = w
+        end
+    end
+
+    --enough for options.dotPadding dots + 2 spaces
+    local extraSpace = 2 + (options.dotPadding or 2)
+    maxLabelWidth = maxLabelWidth + extraSpace
+
+    local final = {}
+    for _, line in pairs(tocLines) do
+        local label = line[1]
+        local rest = line[2]
+        local labelW = vim.fn.strwidth(label)
+        final[#final+1] = string.format(
+            "%s %s %s",
+            -- -2 for spaces
+            label, string.rep(".", maxLabelWidth - labelW - 2),
+            rest
+        )
+    end
+
+    return final
+end
+
 return M
