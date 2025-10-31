@@ -90,6 +90,9 @@ height=[+]{height}
             use a dotpadding of n
         char=x
             use x as the char
+        dalign=left|right
+            align the description to left or right
+            defaults to left
 
 ==============================================================================
 2. Configuration

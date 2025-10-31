@@ -2,6 +2,7 @@
              A simple plugin for easily drawing boxes and dividers
 -------------------------------------------------------------------------------
     == Commands ==
+        `:Toc` .............. make a table of contents-appearing block
         `:Divl` ............. draw a line of a char
         `:Divw` ............. write a word surrounded by char on either side
         `:Divbox` ........... combines `:Box` and `:Divw`

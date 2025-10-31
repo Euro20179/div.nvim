@@ -242,6 +242,7 @@ end
 ---@class div.tableofcontents.Options
 ---@field char string? the char to use as the separator
 ---@field dotPadding integer?
+---@field descAlign ("left" | "right")?
 
 ---@param lines string[]
 ---@param options div.tableofcontents.Options
@@ -276,18 +277,24 @@ function M.tableofconents(lines, options)
     local extraSpace = 2 + (options.dotPadding or 2)
     maxLabelWidth = maxLabelWidth + extraSpace
 
+    local dalign = options.descAlign or "left"
+
     local final = {}
     for _, line in pairs(tocLines) do
         local label = line[1]
         local rest = line[2]
         local labelW = vim.fn.strwidth(label)
+        if dalign ~= "left" then
+            --left pad the rest so that every line is the same width
+            --so that the block can be cenetered nicer
+            rest = string.rep(' ', maxRestWidth - vim.fn.strwidth(rest)) .. rest
+        end
+
         final[#final+1] = string.format(
             "%s %s %s",
             -- -2 for spaces
             label, string.rep(".", maxLabelWidth - labelW - 2),
-            --left pad the rest so that every line is the same width
-            --so that the block can be cenetered nicer
-            string.rep(' ', maxRestWidth - vim.fn.strwidth(rest)) .. rest
+            rest
         )
     end
 

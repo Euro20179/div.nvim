@@ -154,6 +154,7 @@ vim.api.nvim_create_user_command("Toc", function(cmdData)
 
     local text = div.tableofconents(lines, {
         dotPadding = dotP,
+        descAlign = kwargs.dalign or "left"
     })
 
     vim.api.nvim_buf_set_lines(0, cmdData.line1 - 1, cmdData.line2, false, text)
