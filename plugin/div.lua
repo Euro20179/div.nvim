@@ -109,7 +109,7 @@ vim.api.nvim_create_user_command("Divline", function(cmdData)
 
     local fullLine = char:rep(width)
     for i = line, endLine do
-        vim.api.nvim_buf_set_lines(0, i - 1, endLine, false, {fullLine})
+        vim.api.nvim_buf_set_lines(0, i - 1, endLine, false, { fullLine })
     end
 end, { addr = "lines", bang = true, nargs = "*" })
 
@@ -153,8 +153,8 @@ vim.api.nvim_create_user_command("Toc", function(cmdData)
     end
 
     local text = div.tableofconents(lines, {
-        dotPadding = dotP
+        dotPadding = dotP,
     })
 
     vim.api.nvim_buf_set_lines(0, cmdData.line1 - 1, cmdData.line2, false, text)
-end, {range = true, nargs = "*"})
+end, { range = true, nargs = "*" })

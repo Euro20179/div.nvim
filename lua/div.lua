@@ -250,15 +250,25 @@ function M.tableofconents(lines, options)
     local tocLines = {}
 
     local maxLabelWidth = 0
+    local maxRestWidth = 0
     for _, line in pairs(lines) do
-        local firstSpace = line:find("%s")
-        local label = line:sub(0, firstSpace - 1)
-        local rest = line:sub(firstSpace + 1)
-        tocLines[#tocLines+1] = {label, rest:gsub("\\.+ ", "")}
+        --find the first non-leading space because otherwise it will match
+        --the leading space and mess up the dots
+        local firstNonLeadingSpace = line:find("[^%s]%s") + 1
+        local label = line:sub(0, firstNonLeadingSpace - 1)
+        local rest = line:sub(firstNonLeadingSpace + 1)
+
+        rest = rest:gsub("%.+ ", "")
+        tocLines[#tocLines+1] = {label, rest}
 
         local w = vim.fn.strwidth(label)
         if w > maxLabelWidth then
             maxLabelWidth = w
+        end
+
+        w = vim.fn.strwidth(rest)
+        if w > maxRestWidth then
+            maxRestWidth = w
         end
     end
 
@@ -275,7 +285,9 @@ function M.tableofconents(lines, options)
             "%s %s %s",
             -- -2 for spaces
             label, string.rep(".", maxLabelWidth - labelW - 2),
-            rest
+            --left pad the rest so that every line is the same width
+            --so that the block can be cenetered nicer
+            string.rep(' ', maxRestWidth - vim.fn.strwidth(rest)) .. rest
         )
     end
 
