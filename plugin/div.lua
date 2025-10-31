@@ -1,5 +1,24 @@
 local divwFormatting = "auto"
 
+---@param kwargs string[]
+local function kwargs2tbl(kwargs)
+    local tbl = {}
+    for _, kwarg in ipairs(kwargs) do
+        if not kwarg:match("=") then
+            goto continue
+        end
+
+        local eq = kwarg:find("=")
+        local key = kwarg:sub(1, eq - 1)
+        local value = kwarg:sub(eq + 1)
+
+        tbl[key] = value
+
+        ::continue::
+    end
+    return tbl
+end
+
 vim.api.nvim_create_user_command("Divfw", function(data)
     divwFormatting = data.args
 end, {
@@ -52,20 +71,25 @@ local function getScreenWidth()
     return width
 end
 
-local function boxify(args)
-    if args.range ~= 2 then
-        vim.notify("A visual range must be selected", vim.log.levels.ERROR)
-        return
-    end
+---@class div.boxify.Kwargs
+---@field tl string?
+---@field tr string?
+---@field br string
+---@field bl string?
+---@field h string?
+---@field v string?
+---@field style ("b" | "d")?
+---@field width string?
+---@field height string?
 
-    local sl = vim.fn.line("'<") - 1
-    local sc = vim.fn.col("'<") - 1
-    local el = vim.fn.line("'>") - 1
-    local ec = vim.fn.col("'>")
+---@param line1 integer
+---@param line2 integer
+---@param kwargs div.boxify.Kwargs
+local function boxify(line1, line2, kwargs)
+    local sl = line1 - 1
+    local el = line2
 
-    local text = vim.api.nvim_buf_get_text(0, sl, sc, el, ec, {})
-
-    local strip = false
+    local text = vim.api.nvim_buf_get_lines(0, sl, el, false)
 
     local height = #text - 2
     local lineCount = #text
@@ -76,66 +100,54 @@ local function boxify(args)
         end
     end
 
-    local tl = "┌"
-    local tr = "┐"
-    local br = "┘"
-    local bl = "└"
-    local h = "─"
-    local v = "│"
+    local tl = kwargs.tl or "┌"
+    local tr = kwargs.tr or "┐"
+    local br = kwargs.br or "┘"
+    local bl = kwargs.bl or "└"
+    local h = kwargs.h or "─"
+    local v = kwargs.v or "│"
 
-    local fargs = args.fargs
-
-    if fargs[1] == "b" then
-        tl = "┏"
-        tr = "┓"
-        bl = "┗"
-        br = "┛"
-        h = "━"
-        v = "┃"
-    elseif fargs[1] == "d" then
-        tr = "╗"
-        tl = "╔"
-        br = "╝"
-        bl = "╚"
-        h = "═"
-        v = "║"
+    if kwargs.style then
+        if kwargs.style == "b" then
+            tl = "┏"
+            tr = "┓"
+            bl = "┗"
+            br = "┛"
+            h = "━"
+            v = "┃"
+        elseif kwargs.style == 'd' then
+            tr = "╗"
+            tl = "╔"
+            br = "╝"
+            bl = "╚"
+            h = "═"
+            v = "║"
+        end
     end
 
-    for _, kwarg in pairs(fargs) do
-        if vim.startswith(kwarg, "h=") then
-            h = string.sub(kwarg, 3)
-        elseif vim.startswith(kwarg, "v=") then
-            v = string.sub(kwarg, 3)
-        elseif vim.startswith(kwarg, "tl=") then
-            v = string.sub(kwarg, 4)
-        elseif vim.startswith(kwarg, "tr=") then
-            v = string.sub(kwarg, 4)
-        elseif vim.startswith(kwarg, "br=") then
-            v = string.sub(kwarg, 4)
-        elseif vim.startswith(kwarg, "bl=") then
-            v = string.sub(kwarg, 4)
-        elseif vim.startswith(kwarg, "width=") then
-            local amount = string.sub(kwarg, 7)
+    if kwargs.width ~= nil then
+        local amount = kwargs.width or width
 
-            if string.sub(amount, 1, 1) == "+" then
-                width = width + (tonumber(string.sub(amount, 2))) * 2
-                vim.print(width)
-            else
-                local n = tonumber(amount)
-                if n and n > width then
-                    width = math.floor(n)
-                end
+        if string.sub(amount, 1, 1) == "+" then
+            width = width + (tonumber(string.sub(amount, 2))) * 2
+            vim.print(width)
+        else
+            local n = tonumber(amount)
+            if n and n > width then
+                width = math.floor(n)
             end
-        elseif vim.startswith(kwarg, "height=") then
-            local amount = string.sub(kwarg, 7)
+        end
+    end
 
-            if string.sub(amount, 1, 1) == "+" then
-                height = height + (tonumber(string.sub(amount, 2))) * 2
-            else
-                local n = tonumber(amount)
-                if n and n > height then
-                    height = math.floor(n)
-                end
+    if kwargs.height ~= nil then
+        local amount = kwargs.height or height
+
+        if string.sub(amount, 1, 1) == "+" then
+            height = height + (tonumber(string.sub(amount, 2))) * 2
+        else
+            local n = tonumber(amount)
+            if n and n > height then
+                height = math.floor(n)
             end
         end
     end
@@ -181,10 +193,13 @@ local function boxify(args)
     newText[last] = newText[last] .. br
     -- }}}
 
-    vim.api.nvim_buf_set_text(0, sl, sc, el, ec - 1, newText)
+    vim.api.nvim_buf_set_lines(0, sl, el, false, newText)
+    -- vim.api.nvim_buf_set_text(0, sl, sc, el, ec - 1, newText)
 end
 
-vim.api.nvim_create_user_command("Boxify", boxify, { range = true, nargs = "?" })
+vim.api.nvim_create_user_command("Boxify", function(cmdData)
+    boxify(cmdData.line1, cmdData.line2, kwargs2tbl(cmdData.fargs))
+end, { range = true, nargs = "*" })
 
 ---@param data vim.api.keyset.create_user_command.command_args
 local function getStartEndLines(data)
@@ -202,7 +217,6 @@ local function getStartEndLines(data)
         endLine    = line
         line       = temp
     end
-
 
     return line, endLine
 end
@@ -324,8 +338,8 @@ end
 vim.api.nvim_create_user_command("Divword", divword, { addr = 'lines', bang = true, nargs = "*" })
 
 vim.api.nvim_create_user_command("Divbox", function(cmdData)
-    vim.cmd[[
-        exec "norm V:Boxify\<CR>"
+    vim.cmd [[
+        Boxify
         .,+2cen
         norm j
         Divw! ─
