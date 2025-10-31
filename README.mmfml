@@ -4,6 +4,8 @@
     == Commands ==
         `:Divl` ............. draw a line of a char
         `:Divw` ............. write a word surrounded by char on either side
+        `:Divbox` ........... combines `:Box` and `:Divw`
         `:[range]Boxify` .... put [range] in a box
 
         See `:help div.txt` for more info
+        Also see `lua/div.lua` for the lua api that the commands use
