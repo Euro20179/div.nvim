@@ -326,7 +326,6 @@ vim.api.nvim_create_user_command("Divword", divword, { addr = 'lines', bang = tr
 vim.api.nvim_create_user_command("Divbox", function(cmdData)
     vim.cmd[[
         exec "norm V:Boxify\<CR>"
-        norm k
         .,+2cen
         norm j
         Divw! ─
