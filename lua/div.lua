@@ -236,7 +236,7 @@ function M.divword(height, text, options)
         end
     end
 
-    return M.draw(text, char, width, instructions)
+    return M.draw(text, char, width, instructions):sub(0, -2)
 end
 
 return M

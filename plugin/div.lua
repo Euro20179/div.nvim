@@ -107,8 +107,9 @@ vim.api.nvim_create_user_command("Divline", function(cmdData)
 
     width = width / vim.fn.strwidth(char)
 
+    local fullLine = char:rep(width)
     for i = line, endLine do
-        vim.fn.setline(i, string.rep(char, width))
+        vim.api.nvim_buf_set_lines(0, i - 1, endLine, false, {fullLine})
     end
 end, { addr = "lines", bang = true, nargs = "*" })
 
@@ -134,9 +135,9 @@ vim.api.nvim_create_user_command("Divword", divword, { addr = 'lines', bang = tr
 vim.api.nvim_create_user_command("Divbox", function()
     vim.cmd [[
         Boxify
-        .,+2cen
         norm j
         Divw! ─
         norm 0f│r┤f│r├
+        -1,+1cen
     ]]
 end, {})
