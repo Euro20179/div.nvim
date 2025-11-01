@@ -52,7 +52,14 @@ end
 
 vim.api.nvim_create_user_command("Boxify", function(cmdData)
     local text = vim.api.nvim_buf_get_lines(0, cmdData.line1 - 1, cmdData.line2, false)
-    local box = div.boxify(text, kwargs2tbl(cmdData.fargs))
+    local style = "auto"
+    if cmdData.fargs[1] and not cmdData.fargs[1]:match("=") then
+        style = cmdData.fargs[1]
+        cmdData.fargs = vim.fn.slice(cmdData.fargs, 1)
+    end
+    local tbl = kwargs2tbl(cmdData.fargs)
+    tbl["style"] = style
+    local box = div.boxify(text, tbl)
     vim.api.nvim_buf_set_lines(0, cmdData.line1 - 1, cmdData.line2, false, box)
 end, { range = true, nargs = "*" })
 

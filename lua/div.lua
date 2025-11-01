@@ -30,7 +30,7 @@ end
 ---@field bl string?
 ---@field h string?
 ---@field v string?
----@field style ("b" | "d")?
+---@field style ("b" | "d" | "l")?
 ---@field width string?
 ---@field height string?
 
@@ -68,6 +68,13 @@ function M.boxify(text, kwargs)
             bl = "╚"
             h = "═"
             v = "║"
+        elseif kwargs.style == "l" then
+            tr = "┐"
+            tl = "┌"
+            br = "┘"
+            bl = "└"
+            h = "─"
+            v = "│"
         end
     end
 
