@@ -260,6 +260,10 @@ function M.tableofconents(lines, options)
     local maxLabelWidth = 0
     local maxRestWidth = 0
     for _, line in pairs(lines) do
+        if vim.fn.trim(line) == "" then
+            tocLines[#tocLines+1] = ""
+            goto continue
+        end
         --find the first non-leading space because otherwise it will match
         --the leading space and mess up the dots
         local firstNonLeadingSpace = line:find("[^%s]%s") + 1
@@ -278,6 +282,8 @@ function M.tableofconents(lines, options)
         if w > maxRestWidth then
             maxRestWidth = w
         end
+
+        ::continue::
     end
 
     --enough for options.dotPadding dots + 2 spaces
@@ -288,9 +294,15 @@ function M.tableofconents(lines, options)
 
     local final = {}
     for _, line in pairs(tocLines) do
+        if line == "" then
+            final[#final+1] = ""
+            goto continue
+        end
+
         local label = line[1]
         local rest = line[2]
         local labelW = vim.fn.strwidth(label)
+
         if dalign ~= "left" then
             --left pad the rest so that every line is the same width
             --so that the block can be cenetered nicer
@@ -303,6 +315,8 @@ function M.tableofconents(lines, options)
             label, string.rep(".", maxLabelWidth - labelW - 2),
             rest
         )
+
+        ::continue::
     end
 
     return final
