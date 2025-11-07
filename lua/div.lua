@@ -220,13 +220,25 @@ function M.divword(height, text, options)
     local width = options.width or 80
 
 
-    local format = options.format
+    local format = options.format or "auto"
     local instructions = {}
-    if format == nil or format == "auto" then
+    if format == "auto" then
         if height == 1 then
-            instructions[1] = "LtR"
+            format = "line"
         elseif height % 2 == 1 then
-            local middle = math.floor(height / 2)
+            format = "box"
+        else
+            format = "tb"
+        end
+    end
+
+    if format == "line" then
+        instructions[1] = "LtR"
+    elseif format == "box" then
+        local middle = math.floor(height / 2)
+        if height == 1 then
+            instructions[1] = 'ltr'
+        else
             for i = 1, height do
                 if i == middle then
                     instructions[#instructions + 1] = 'ltr'
@@ -234,14 +246,16 @@ function M.divword(height, text, options)
                     instructions[#instructions + 1] = 'l r'
                 end
             end
-        else
-            instructions[1] = 'LtR'
-            for i = 1, height - 1 do
-                instructions[#instructions + 1] = 'l r'
-            end
-            instructions[#instructions + 1] = 'LtR'
         end
+    elseif format == "tb" then
+        instructions[1] = 'LtR'
+        for _ = 1, height - 1 do
+            instructions[#instructions + 1] = 'l r'
+        end
+        instructions[#instructions + 1] = 'LtR'
     end
+
+    vim.print(text, instructions)
 
     return M.draw(text, char, width, instructions):sub(0, -2)
 end
@@ -254,14 +268,13 @@ end
 ---@param lines string[]
 ---@param options div.tableofcontents.Options
 function M.tableofconents(lines, options)
-
     local tocLines = {}
 
     local maxLabelWidth = 0
     local maxRestWidth = 0
     for _, line in pairs(lines) do
         if vim.fn.trim(line) == "" then
-            tocLines[#tocLines+1] = ""
+            tocLines[#tocLines + 1] = ""
             goto continue
         end
         --find the first non-leading space because otherwise it will match
@@ -271,7 +284,7 @@ function M.tableofconents(lines, options)
         local rest = line:sub(firstNonLeadingSpace + 1)
 
         rest = rest:gsub("%.+ ", "")
-        tocLines[#tocLines+1] = {label, rest}
+        tocLines[#tocLines + 1] = { label, rest }
 
         local w = vim.fn.strwidth(label)
         if w > maxLabelWidth then
@@ -295,7 +308,7 @@ function M.tableofconents(lines, options)
     local final = {}
     for _, line in pairs(tocLines) do
         if line == "" then
-            final[#final+1] = ""
+            final[#final + 1] = ""
             goto continue
         end
 
@@ -309,7 +322,7 @@ function M.tableofconents(lines, options)
             rest = string.rep(' ', maxRestWidth - vim.fn.strwidth(rest)) .. rest
         end
 
-        final[#final+1] = string.format(
+        final[#final + 1] = string.format(
             "%s %s %s",
             -- -2 for spaces
             label, string.rep(".", maxLabelWidth - labelW - 2),

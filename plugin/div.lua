@@ -124,13 +124,24 @@ local function divword(cmdData)
     local char, lineText, line, endLine, width = parseDivwlData(cmdData, 1, 2)
     if width == 0 then return end
 
-    if #cmdData.fargs > 1 then
+    if #cmdData.fargs > 1 and cmdData.fargs[2] ~= "." then
         lineText = cmdData.fargs[2]
+    end
+
+    local formatting = divwFormatting
+
+    if #cmdData.fargs > 2 then
+        local kwargs = kwargs2tbl(vim.fn.slice(cmdData.fargs, 2))
+        if kwargs["width"] ~= nil then
+            width = tonumber(kwargs["width"]) or width
+        elseif kwargs["s"] ~= nil then
+            formatting = kwargs["s"]
+        end
     end
 
     local text = div.divword(endLine - line + 1, lineText, {
         char = char,
-        format = divwFormatting,
+        format = formatting,
         width = width
     })
 
@@ -142,9 +153,9 @@ vim.api.nvim_create_user_command("Divword", divword, { addr = 'lines', bang = tr
 vim.api.nvim_create_user_command("Divbox", function()
     vim.cmd [[
         Boxify
-        norm j
-        Divw! ─
-        norm 0f│r┤f│r├
+        +1Divw! ─
+        "this moves the cursor
+        +1norm 0f│r┤f│r├
         -1,+1cen
     ]]
 end, {})

@@ -35,9 +35,9 @@ height=[+]{height}
 
                                                                       *:Divfw*
 :Divfw {style}
-    Sets the style of |:Divw|.
+    Sets the style of |:Divword|.
 
-    {style} can be one of:
+    Styles: ~
         auto - automatically determined based on |divw-rules|
         line - act as if one line was given for [range]
         box  - draw a box
@@ -53,9 +53,12 @@ height=[+]{height}
     The default char is -
 
                                                                      *:Divword*
-:[range]Divw[ord][!] {char} {text} [{width}]
+:[range]Divw[ord][!] {char} [{text} [{width}]]
     Puts {char} on either side of {text} to fill the entire width.
-    See |Divline| for the rules reguarding how long the width is.
+    See |div-textwidth| for the rules reguarding how long the width is.
+
+    {text} must be 1 argument, to include spaces use a "\" before the space.
+    If {text} is ".", use the current line as {text}.
 
                                                                   *divw-rules*
     If |:Divfw| style is auto:
@@ -66,6 +69,17 @@ height=[+]{height}
     Otherwise use the |:Divfw| style
 
     If ! is given, override the current line
+
+:[range]Divw[ord][!] {char} [{text} [{kwargs}]]
+    Same as |:Divword|, however accepts more options can be specified than
+    just the width
+
+    kwargs: ~
+        width=n
+            Set the width to n
+        s=style
+            Set the style of the divider. Format can be any of the styles from
+            |:Divfw|
 
                                                                      *:Divbox*
 :Divb[ox]
@@ -85,7 +99,7 @@ height=[+]{height}
     {char} is "." by default
     {dotp} is the dotpadding, 4 by default
 
-    {kwargs}:
+    kwargs: ~
         dotp=n
             use a dotpadding of n
         char=x
