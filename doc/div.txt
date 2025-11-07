@@ -118,15 +118,15 @@ There isn't much configuration here.
 2.1 Variables
                                                                *div-variables*
 
-                                                           *b:mmfml_textwidth*
-b:mmfml_textwidth   the text width to use instead of 'textwidth'.
+                                                           *b:div_textwidth*
+b:div_textwidth   the text width to use instead of 'textwidth'.
                     Falls back to 80.
 
 ==============================================================================
 3. Misc
                                                                *div-textwidth*
 The order for determining text width
-1. use |b:mmfml_textwidth|
+1. use |b:div_textwidth|
 2. fallback 'textwidth'
 3. fallback to 80
 

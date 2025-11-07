@@ -40,7 +40,7 @@ local function falsey(val)
 end
 
 local function getScreenWidth()
-    local width = vim.b.mmfml_textwidth
+    local width = vim.b.div_textwidth or vim.b.mmfml_textwidth
     if falsey(width) then
         width = vim.bo.textwidth
     end
