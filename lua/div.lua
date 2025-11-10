@@ -453,6 +453,10 @@ function M.table(text, column, maxWidth)
             -- column is not in line, then that means there is only 1 column in
             -- the line (the first column)
             line = string.format("%-" .. tostring(math.min(longestColumns[1], maxColumnWidth)) .. "s", line) .. column
+
+            for i = 2, columnCount - 1 do
+                line = line .. string.format("%-" .. tostring(math.min(longestColumns[i], maxColumnWidth) + 1) .. "s", ' ') .. column
+            end
         end
 
         out[#out + 1] = line
