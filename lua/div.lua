@@ -335,4 +335,71 @@ function M.tableofconents(lines, options)
     return final
 end
 
+---Aligns tabled data with a column of {column}
+---Each column can have a max width of {maxwidth}
+---The width of each column is determined by:
+---   min(maxColumnWidth, maxWidth)
+---   where maxColumnWidth is the longest line in the column
+---the total width of the table may exceed 'textwidth'
+---@param text string
+---@param column string - the column separator
+---@param maxWidth integer - the maxwidth of any given column
+function M.table(text, column, maxWidth)
+    local lines = vim.split(text, "\n")
+
+    local columns = {}
+
+    for i, _ in ipairs(vim.split(lines[1], column)) do
+        columns[i] = {}
+    end
+
+    local columnCount = #columns
+
+    for linenr, line in ipairs(lines) do
+        vim.iter(
+            vim.split(line, column)
+        )
+            :map(vim.fn.trim)
+            :enumerate()
+            :map(function(i, v)
+                if i > columnCount then
+                    columns[i] = {}
+                    for _ = 1, linenr - 1 do
+                        columns[i][#columns[i] + 1] = " "
+                    end
+                    columnCount = i
+                end
+                columns[i][#columns[i] + 1] = v
+            end)
+            :totable()
+    end
+
+    local longestColumns = {}
+    for i = 1, columnCount do
+        local longest = 0
+        for _, c in pairs(columns[i]) do
+            if vim.fn.len(c) > longest then
+                longest = vim.fn.len(c)
+            end
+        end
+        -- +1 is padding
+        longestColumns[i] = longest + 1
+    end
+
+    local out = {}
+    for linenr = 1, #lines do
+        local line = ""
+        for colNr, c in pairs(columns) do
+            line = line .. string.format("%-" .. tostring(longestColumns[colNr]) .. "s", c[linenr]) .. column .. ' '
+        end
+        line = vim.fn.trim(line)
+        while vim.endswith(line, column) do
+            line = line:sub(0, vim.fn.len(line) - vim.fn.len(column))
+        end
+        out[#out + 1] = vim.fn.trim(line)
+    end
+
+    return out
+end
+
 return M

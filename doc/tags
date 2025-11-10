@@ -3,6 +3,7 @@
 :Divfw	div.txt	/*:Divfw*
 :Divline	div.txt	/*:Divline*
 :Divword	div.txt	/*:Divword*
+:Table	div.txt	/*:Table*
 :Toc	div.txt	/*:Toc*
 b:div_textwidth	div.txt	/*b:div_textwidth*
 boxify-kwargs	div.txt	/*boxify-kwargs*

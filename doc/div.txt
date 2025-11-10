@@ -108,6 +108,21 @@ height=[+]{height}
             align the description to left or right
             defaults to left
 
+                                                                      *:Table*
+:[range]Table {column}
+    Aligns a table with a column separator of {column}.
+    Example ~
+    >
+    Column 1 ::: Longer column
+    Some text ::: more text
+<
+    Using `1,2Table :::` will result in:
+    >
+    Column 1  ::: Longer column
+    Some text ::: more text
+<
+
+
 ==============================================================================
 2. Configuration
                                                                    *div-config*
