@@ -3,6 +3,7 @@
 -------------------------------------------------------------------------------
     == Commands ==
         `:Toc` .............. make a table of contents-appearing block
+        `:Table` ............ align a table
         `:Divl` ............. draw a line of a char
         `:Divw` ............. write a word surrounded by char on either side
         `:Divbox` ........... combines `:Box` and `:Divw`
