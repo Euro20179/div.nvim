@@ -180,7 +180,8 @@ end, { range = true, nargs = "*" })
 
 vim.api.nvim_create_user_command("Table", function(cmdData)
     local text = table.concat(vim.api.nvim_buf_get_lines(0, cmdData.line1 - 1, cmdData.line2, false), "\n")
-    local textLines = div.table(text, cmdData.fargs[1], 20)
+
+    local textLines = div.table(text, cmdData.fargs[1])
 
     vim.api.nvim_buf_set_lines(0, cmdData.line1 - 1, cmdData.line2, false, textLines)
 end, { range = true, nargs = 1 })

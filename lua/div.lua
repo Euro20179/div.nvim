@@ -343,7 +343,7 @@ end
 ---the total width of the table may exceed 'textwidth'
 ---@param text string
 ---@param column string - the column separator
----@param maxWidth integer - the maxwidth of any given column
+---@param maxWidth integer? - the maxwidth of any given column
 function M.table(text, column, maxWidth)
     local lines = vim.split(text, "\n")
 
@@ -386,17 +386,76 @@ function M.table(text, column, maxWidth)
         longestColumns[i] = longest + 1
     end
 
+    local maxColumnWidth = (maxWidth or math.floor(vim.o.textwidth / #columns))
+
     local out = {}
+    local newCols = {}
+
+    local extraLines = 0
+
     for linenr = 1, #lines do
-        local line = ""
         for colNr, c in pairs(columns) do
-            line = line .. string.format("%-" .. tostring(longestColumns[colNr]) .. "s", c[linenr]) .. column .. ' '
+            local columnLen = math.min(longestColumns[colNr], maxColumnWidth)
+            local colText = c[linenr]
+
+
+            local col = newCols[colNr]
+
+            if col == nil then
+                col = {}
+                newCols[colNr] = col
+            end
+
+            local nextLines = {}
+            while vim.fn.len(colText) > columnLen do
+                nextLines[#nextLines + 1] = colText:sub(vim.fn.len(colText) - columnLen + 1)
+                colText = colText:sub(1, vim.fn.len(colText) - columnLen)
+            end
+
+            nextLines = vim.iter(nextLines):rev():totable()
+
+            col[linenr + extraLines] = colText
+
+            if #nextLines > 0 then
+                for i = 1, #nextLines do
+                    col[linenr + extraLines + i] = nextLines[i]
+                end
+                extraLines = extraLines + #nextLines
+            end
         end
-        line = vim.fn.trim(line)
+    end
+
+    for linenr = 1, #lines + extraLines do
+        local line = ""
+
+        -- whether or not this is a line that was a continuation of
+        -- a previous line for column text-wrapping
+        local isContinuationLine = false
+
+        for colnr, col in ipairs(newCols) do
+            if col[linenr] == nil then
+                isContinuationLine = true
+            end
+
+            local columnLen = math.min(longestColumns[colnr], maxColumnWidth)
+
+            line = line .. string.format("%-" .. tostring(columnLen) .. "s", col[linenr] or " ") .. column .. ' '
+        end
+
+        line = line:gsub("%s+$", "")
+
         while vim.endswith(line, column) do
-            line = line:sub(0, vim.fn.len(line) - vim.fn.len(column))
+            line = line:sub(0, vim.fn.len(line) - vim.fn.len(column)):gsub("%s+$", "")
         end
-        out[#out + 1] = vim.fn.trim(line)
+
+        if not line:match(column) then
+            -- we can use longestColumns[1] as the longest column because if
+            -- column is not in line, then that means there is only 1 column in
+            -- the line (the first column)
+            line = string.format("%-" .. tostring(math.min(longestColumns[1], maxColumnWidth)) .. "s", line) .. column
+        end
+
+        out[#out + 1] = line
     end
 
     return out
