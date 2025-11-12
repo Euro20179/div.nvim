@@ -184,12 +184,14 @@ vim.api.nvim_create_user_command("Table", function(cmdData)
     local start = cmdData.line1
     local end_ = cmdData.line2
 
-    while start > 1 and vim.fn.getline(start - 1):match(colDelimiter) ~= nil do
-        start = start - 1
-    end
+    if cmdData.range < 1 then
+        while start > 1 and vim.fn.getline(start - 1):match(colDelimiter) ~= nil do
+            start = start - 1
+        end
 
-    while vim.fn.getline(end_ + 1):match(colDelimiter) ~= nil do
-        end_ = end_ + 1
+        while vim.fn.getline(end_ + 1):match(colDelimiter) ~= nil do
+            end_ = end_ + 1
+        end
     end
 
     local text = table.concat(vim.api.nvim_buf_get_lines(0, start - 1, end_, false), "\n")
