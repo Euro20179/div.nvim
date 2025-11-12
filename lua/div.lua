@@ -355,12 +355,15 @@ function M.table(text, column, maxWidth)
 
     local columnCount = #columns
 
+    -- first, remap lines into a list of columns
     for linenr, line in ipairs(lines) do
         vim.iter(
             vim.split(line, column)
         )
             :map(vim.fn.trim)
             :enumerate()
+            -- this map function creates columns
+            -- and determines the amount of columns
             :map(function(i, v)
                 if i > columnCount then
                     columns[i] = {}
@@ -374,19 +377,35 @@ function M.table(text, column, maxWidth)
             :totable()
     end
 
+    -- next determine the longest row in each column
     local longestColumns = {}
     for i = 1, columnCount do
         local longest = 0
         for _, c in pairs(columns[i]) do
-            if vim.fn.len(c) > longest then
-                longest = vim.fn.len(c)
+            if vim.fn.strwidth(c) > longest then
+                longest = vim.fn.strwidth(c)
             end
         end
         -- +1 is padding
         longestColumns[i] = longest + 1
     end
 
+    -- set the max width
     local maxColumnWidth = (maxWidth or math.floor(vim.o.textwidth / #columns))
+
+    -- if a column is entirely `-`, `=` or `─` then the user probably wants
+    -- that column to be that wide, no exceptions
+    for i = 1, columnCount do
+        for j = 1, #columns[i] do
+            if columns[i][j]:match("^[-=─]+$") then
+                local w = vim.fn.strwidth(columns[i][j])
+                if w > maxColumnWidth then
+                    maxColumnWidth = w
+                end
+            end
+        end
+    end
+
 
     local out = {}
     local newCols = {}
@@ -398,7 +417,6 @@ function M.table(text, column, maxWidth)
             local columnLen = math.min(longestColumns[colNr], maxColumnWidth)
             local colText = c[linenr]
 
-
             local col = newCols[colNr]
 
             if col == nil then
@@ -406,12 +424,15 @@ function M.table(text, column, maxWidth)
                 newCols[colNr] = col
             end
 
+            -- if the column is currently too wide, text wrap it
+            -- nextLines will contain, well... the next lines
             local nextLines = {}
-            while vim.fn.len(colText) > columnLen do
+            while vim.fn.strwidth(colText) > columnLen do
                 nextLines[#nextLines + 1] = colText:sub(vim.fn.len(colText) - columnLen + 1)
-                colText = colText:sub(1, vim.fn.len(colText) - columnLen)
+                colText = colText:sub(1, vim.fn.strwidth(colText) - columnLen)
             end
 
+            -- the while loop creates it backwards
             nextLines = vim.iter(nextLines):rev():totable()
 
             col[linenr + extraLines] = colText
@@ -428,15 +449,8 @@ function M.table(text, column, maxWidth)
     for linenr = 1, #lines + extraLines do
         local line = ""
 
-        -- whether or not this is a line that was a continuation of
-        -- a previous line for column text-wrapping
-        local isContinuationLine = false
-
+        -- format each column in linenr
         for colnr, col in ipairs(newCols) do
-            if col[linenr] == nil then
-                isContinuationLine = true
-            end
-
             local columnLen = math.min(longestColumns[colnr], maxColumnWidth)
 
             line = line .. string.format("%-" .. tostring(columnLen) .. "s", col[linenr] or " ") .. column .. ' '
@@ -445,7 +459,7 @@ function M.table(text, column, maxWidth)
         line = line:gsub("%s+$", "")
 
         while vim.endswith(line, column) do
-            line = line:sub(0, vim.fn.len(line) - vim.fn.len(column)):gsub("%s+$", "")
+            line = line:sub(0, vim.fn.strwidth(line) - vim.fn.strwidth(column)):gsub("%s+$", "")
         end
 
         if not line:match(column) then
