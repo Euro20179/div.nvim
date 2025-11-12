@@ -121,6 +121,24 @@ height=[+]{height}
     Column 1  ::: Longer column
     Some text ::: more text
 <
+    If [range] is not given, it will go up the file until it doesn't find a
+    line containing {column} to find the start, and it will go down to find
+    the end.
+
+    To set the width of a column, create a row within the column made entirely
+    of "=", "-", or "─". >
+    Item ::: Cost
+    ======== ::: =======
+    Apple ::: 0.5
+
+    .
+    .
+    .
+
+    Item     ::: Cost
+    ======== ::: =======
+    Apple    ::: 0.5
+<
 
 
 ==============================================================================

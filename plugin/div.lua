@@ -179,9 +179,22 @@ vim.api.nvim_create_user_command("Toc", function(cmdData)
 end, { range = true, nargs = "*" })
 
 vim.api.nvim_create_user_command("Table", function(cmdData)
-    local text = table.concat(vim.api.nvim_buf_get_lines(0, cmdData.line1 - 1, cmdData.line2, false), "\n")
+    local colDelimiter = cmdData.fargs[1]
 
-    local textLines = div.table(text, cmdData.fargs[1])
+    local start = cmdData.line1
+    local end_ = cmdData.line2
 
-    vim.api.nvim_buf_set_lines(0, cmdData.line1 - 1, cmdData.line2, false, textLines)
+    while start > 1 and vim.fn.getline(start - 1):match(colDelimiter) ~= nil do
+        start = start - 1
+    end
+
+    while vim.fn.getline(end_ + 1):match(colDelimiter) ~= nil do
+        end_ = end_ + 1
+    end
+
+    local text = table.concat(vim.api.nvim_buf_get_lines(0, start - 1, end_, false), "\n")
+
+    local textLines = div.table(text, colDelimiter)
+
+    vim.api.nvim_buf_set_lines(0, start - 1, end_, false, textLines)
 end, { range = true, nargs = 1 })
