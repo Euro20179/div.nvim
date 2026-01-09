@@ -30,6 +30,7 @@ end
 ---@field bl string?
 ---@field h string?
 ---@field v string?
+---@field a string?
 ---@field style ("b" | "d" | "l")?
 ---@field width string?
 ---@field height string?
@@ -46,12 +47,12 @@ function M.boxify(text, kwargs)
         end
     end
 
-    local tl = kwargs.tl or "┌"
-    local tr = kwargs.tr or "┐"
-    local br = kwargs.br or "┘"
-    local bl = kwargs.bl or "└"
-    local h = kwargs.h or "─"
-    local v = kwargs.v or "│"
+    local tl = kwargs.tl or kwargs.a or "┌"
+    local tr = kwargs.tr or kwargs.a or "┐"
+    local br = kwargs.br or kwargs.a or "┘"
+    local bl = kwargs.bl or kwargs.a or "└"
+    local h = kwargs.h or kwargs.a or "─"
+    local v = kwargs.v or kwargs.a or "│"
 
     if kwargs.style then
         if kwargs.style == "b" then

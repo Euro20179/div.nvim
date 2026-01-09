@@ -27,6 +27,8 @@ bl={char}
     set the bottom left char, └ by default
 br={char}
     set the bottom right char, ┘ by default
+a={char}
+    set h, v, tl, tr, bl, br all at once.
 width=[+]{width}
     set the width of the box to {width}
     if + is given, set the width of the box to auto + {width}
