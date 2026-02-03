@@ -189,7 +189,9 @@ vim.api.nvim_create_user_command("Table", function(cmdData)
             start = start - 1
         end
 
-        while vim.fn.getline(end_ + 1):match(colDelimiter) ~= nil do
+        local buflinecnt = vim.api.nvim_buf_line_count(0)
+
+        while end_ < buflinecnt and vim.fn.getline(end_ + 1):match(colDelimiter) ~= nil do
             end_ = end_ + 1
         end
     end
