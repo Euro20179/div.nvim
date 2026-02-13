@@ -84,7 +84,6 @@ function M.boxify(text, kwargs)
 
         if string.sub(amount, 1, 1) == "+" then
             width = width + (tonumber(string.sub(amount, 2))) * 2
-            vim.print(width)
         else
             local n = tonumber(amount)
             if n and n > width then
@@ -256,8 +255,6 @@ function M.divword(height, text, options)
         instructions[#instructions + 1] = 'LtR'
     end
 
-    vim.print(text, instructions)
-
     return M.draw(text, char, width, instructions):sub(0, -2)
 end
 
@@ -392,7 +389,11 @@ function M.table(text, column, maxWidth)
     end
 
     -- set the max width
-    local maxColumnWidth = (maxWidth or math.floor(vim.o.textwidth / #columns))
+    local tw = vim.o.textwidth
+    if tw == 0 then
+        tw = 80
+    end
+    local maxColumnWidth = (maxWidth or math.floor(tw / #columns))
 
     -- if a column is entirely `-`, `=` or `─` then the user probably wants
     -- that column to be that wide, no exceptions
@@ -429,7 +430,7 @@ function M.table(text, column, maxWidth)
             -- nextLines will contain, well... the next lines
             local nextLines = {}
             while vim.fn.strwidth(colText) > columnLen do
-                nextLines[#nextLines + 1] = colText:sub(vim.fn.len(colText) - columnLen + 1)
+                nextLines[#nextLines + 1] = colText:sub(string.len(colText) - columnLen + 1)
                 colText = colText:sub(1, vim.fn.strwidth(colText) - columnLen)
             end
 
